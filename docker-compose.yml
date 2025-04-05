@@ -3,6 +3,7 @@ volumes:
   postgres_storage:
   ollama_storage:
   qdrant_storage:
+  open-webui:
 
 networks:
   demo:
@@ -44,9 +45,22 @@ x-init-ollama: &init-ollama
     - OLLAMA_HOST=ollama:11434
   command:
     - "-c"
-    - "sleep 3; ollama pull llama3.2"
+    - "sleep 3; ollama pull llama3.2; ollama pull nomic-embed-text; ollama pull deepseek-r1:1.5b; ollama pull qwen2.5:3b"
 
 services:
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    networks: ['demo']
+    restart: unless-stopped
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - open-webui:/app/backend/data
+
   postgres:
     image: postgres:16-alpine
     hostname: postgres
